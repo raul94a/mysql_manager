@@ -18,7 +18,7 @@ class EnvReader {
     //file is created in case it does not exist.
     file.create();
   }
- 
+
   late Map<String, dynamic> _env;
   Map<String, dynamic> get env => _env;
 }

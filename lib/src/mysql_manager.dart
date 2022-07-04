@@ -6,9 +6,8 @@ class MySQLManager {
   //attributes
   static MySQLManager? _manager;
   MySqlConnection? _conn;
-  static bool _connectedWithEnv = false;
   static Map<String, dynamic> _connectionConfig = const {};
-  
+
   //private constructor
   MySQLManager._();
 
@@ -20,13 +19,15 @@ class MySQLManager {
     _manager ??= MySQLManager._();
     return _manager!;
   }
+
   ///Getter of MySQLConnection object
   ///
   MySqlConnection? get conn => _conn;
 
   //load connection data
   Future<void> loadConfiguration(
-      [bool useEnvFile = true, Map<String, dynamic> connectionConfig = const {}]) async {
+      [bool useEnvFile = true,
+      Map<String, dynamic> connectionConfig = const {}]) async {
     try {
       await init(useEnvFile, connectionConfig);
     } catch (err) {
@@ -42,9 +43,9 @@ class MySQLManager {
   ///
   ///if [useEnvFile] is setted to true a [config] Map<String,dynamic> is needed.
   /// It's a requirement for this [config] map to have the following structure:
-  /// 
+  ///
   /// ``` Map<String,dynamic> config = {'db':'your_db_name','host':'your_mysql_host', 'user':'your_mysql_user', password: 'your_mysql_password', 'port': your_port}```;
-  /// 
+  ///
   ///However, if you use .env file for the configuration, you can use this method without parameters.
   ///.env file should be located at root and each property should have exactly the same key as the config map of above
   ///keys are separated from their values with a = without spaces between them: db=YOUR_DABATABASE
@@ -54,7 +55,8 @@ class MySQLManager {
   ///If there's a error in the .env file a ```BadMySQLConfigException``` will be thrown.
   ///On the other hand, when not using .env file and setting the configuration directly at [config] argument and the map
   ///has not the correct structure, a ```BadMySQLCodeConfig``` will be raised.
-  Future<MySqlConnection> init([useEnvFile = true, Map<String, dynamic> config = const {}]) async {
+  Future<MySqlConnection> init(
+      [useEnvFile = true, Map<String, dynamic> config = const {}]) async {
     if (useEnvFile) {
       try {
         await _initWithEnv();
@@ -76,11 +78,11 @@ class MySQLManager {
   Future<void> close() async => await _conn!.close();
 
   ///query
-  Future<Results> query(String sql, [List<Object?>? values])async{
-    if(_conn == null){
+  Future<Results> query(String sql, [List<Object?>? values]) async {
+    if (_conn == null) {
       throw Exception('MySQL Connection has not been initialized.');
     }
-    return _conn!.query(sql,values);
+    return _conn!.query(sql, values);
   }
 
   //initialize with env file
@@ -95,7 +97,6 @@ class MySQLManager {
         throw BadMySQLConfigException();
       }
       _connectionConfig = env;
-      _connectedWithEnv = true;
     }
 
     final connSettings = ConnectionSettings(
@@ -113,7 +114,6 @@ class MySQLManager {
         throw BadMySQLCodeConfigException();
       }
       _connectionConfig = config;
-      _connectedWithEnv = false;
     }
 
     final connSettings = ConnectionSettings(
