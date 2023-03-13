@@ -1,11 +1,12 @@
-import 'package:mysql1/mysql1.dart';
+import 'package:mysql_client/mysql_client.dart';
 import 'package:mysql_manager/src/env_reader.dart';
 import 'package:mysql_manager/src/errors/env_reader_exceptions.dart';
 
 class MySQLManager {
   //attributes
   static MySQLManager? _manager;
-  MySqlConnection? _conn;
+  MySQLConnection? _conn;
+
   static Map<String, dynamic> _connectionConfig = const {};
 
   //private constructor
@@ -22,7 +23,7 @@ class MySQLManager {
 
   ///Getter of MySQLConnection object
   ///
-  MySqlConnection? get conn => _conn;
+  MySQLConnection? get conn => _conn;
 
   //load connection data
   Future<void> loadConfiguration(
@@ -55,7 +56,7 @@ class MySQLManager {
   ///If there's a error in the .env file a ```BadMySQLConfigException``` will be thrown.
   ///On the other hand, when not using .env file and setting the configuration directly at [config] argument and the map
   ///has not the correct structure, a ```BadMySQLCodeConfig``` will be raised.
-  Future<MySqlConnection> init(
+  Future<MySQLConnection> init(
       [useEnvFile = true, Map<String, dynamic> config = const {}]) async {
     if (useEnvFile) {
       try {
@@ -78,11 +79,11 @@ class MySQLManager {
   Future<void> close() async => await _conn!.close();
 
   ///query
-  Future<Results> query(String sql, [List<Object?>? values]) async {
+  Future<IResultSet> query(String sql, [Map<String, dynamic>? values]) async {
     if (_conn == null) {
       throw Exception('MySQL Connection has not been initialized.');
     }
-    return _conn!.query(sql, values);
+    return _conn!.execute(sql, values);
   }
 
   //initialize with env file
@@ -98,14 +99,14 @@ class MySQLManager {
       }
       _connectionConfig = env;
     }
-
-    final connSettings = ConnectionSettings(
+    final connection = await MySQLConnection.createConnection(
         host: _connectionConfig['host'],
         port: int.parse(_connectionConfig['port']),
-        user: _connectionConfig['user'],
+        userName: _connectionConfig['user'],
         password: _connectionConfig['password'],
-        db: _connectionConfig['db']);
-    _conn = await MySqlConnection.connect(connSettings);
+        databaseName: _connectionConfig['db']);
+    await connection.connect();
+    _conn = connection;
   }
 
   Future<void> _selfInit({Map<String, dynamic> config = const {}}) async {
@@ -116,13 +117,16 @@ class MySQLManager {
       _connectionConfig = config;
     }
 
-    final connSettings = ConnectionSettings(
+    final connection = await MySQLConnection.createConnection(
         host: _connectionConfig['host'],
         port: int.parse(_connectionConfig['port']),
-        user: _connectionConfig['user'],
+        userName: _connectionConfig['user'],
         password: _connectionConfig['password'],
-        db: _connectionConfig['db']);
-    _conn = await MySqlConnection.connect(connSettings);
+        databaseName: _connectionConfig['db']);
+
+    await connection.connect();
+
+    _conn = connection;
   }
 
   bool _isConnectionConfigCorrect(Map<String, dynamic> config) {

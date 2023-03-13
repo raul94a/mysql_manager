@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:mysql1/mysql1.dart';
+
+import 'package:mysql_client/mysql_client.dart';
 import 'package:mysql_manager/src/env_reader.dart';
 import 'package:mysql_manager/src/mysql_manager.dart';
 import 'package:test/test.dart';
@@ -15,7 +16,7 @@ void main() {
   //you can test if you have configured your .env file in a good way with this test
   test('.env file is well configured', () async {
     final manager = MySQLManager.instance;
-    expect(await manager.init(), isA<MySqlConnection>());
+    expect(await manager.init(), isA<MySQLConnection>());
     await expectLater(manager.query('select * from this_table_does_not_exist'),
         throwsA(isA<Exception>()));
   });
@@ -29,10 +30,11 @@ void main() {
     await envReader.load();
     final config = envReader.env;
     final manager = MySQLManager.instance;
-    expect(await manager.init(false, config), isA<MySqlConnection>());
+    expect(await manager.init(false, config), isA<MySQLConnection>());
     await expectLater(manager.query('select * from this_table_does_not_exist'),
         throwsA(isA<Exception>()));
     final res = await manager.query('select * from test');
-    expect(res.fields.length, greaterThanOrEqualTo(0));
+  
+    expect(res.rows.length, greaterThanOrEqualTo(0));
   });
 }

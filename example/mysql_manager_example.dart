@@ -28,11 +28,11 @@ void main() async {
 //initialize the connection. Init method will return a MySqlConnection object
   final conn = await manager.init();
 //you can pass sql to the query method
-  final results = await conn.query('select * from test');
+  final results = await conn.execute('select * from test');
 //results will be a iterator,so is possible to loop over it
   for (var r in results) {
     //returns data in Map<String,dynamic> format
-    print(r.fields);
+    print(r.rows);
   }
 
   await conn.close();
